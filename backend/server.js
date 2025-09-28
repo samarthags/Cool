@@ -1,5 +1,4 @@
 const express = require("express");
-const fetch = require("node-fetch"); // Node >=18 has native fetch
 const path = require("path");
 const { spawn } = require("child_process");
 
@@ -21,7 +20,7 @@ app.post("/chat", async (req, res) => {
   try {
     const userMessage = req.body.message;
 
-    // Call Python AI server
+    // Call Python AI server using Node 22+ built-in fetch
     const response = await fetch("http://localhost:5000/api/v1/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
