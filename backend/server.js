@@ -15,24 +15,30 @@ py.on("close", (code) => {
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "../frontend"))); // serve frontend
 
+// Helper to call Python AI server with retries
+async function callAI(message, retries = 10) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await fetch("http://localhost:5000/api/v1/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ inputs: message }),
+      });
+      const data = await res.json();
+      return data;
+    } catch (err) {
+      console.log(`Python AI not ready, retrying... (${i + 1})`);
+      await new Promise(r => setTimeout(r, 2000)); // wait 2 seconds
+    }
+  }
+  return { generated_text: "AI server is still loading, please try again in a few seconds." };
+}
+
 // Chat API
 app.post("/chat", async (req, res) => {
-  try {
-    const userMessage = req.body.message;
-
-    // Call Python AI server using Node 22+ built-in fetch
-    const response = await fetch("http://localhost:5000/api/v1/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ inputs: userMessage }),
-    });
-
-    const data = await response.json();
-    res.json({ reply: data.generated_text });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ reply: "Error connecting to AI server." });
-  }
+  const userMessage = req.body.message || "";
+  const aiResponse = await callAI(userMessage);
+  res.json({ reply: aiResponse.generated_text });
 });
 
 app.listen(PORT, () => console.log(`Node.js server running on port ${PORT}`));
