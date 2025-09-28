@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free AI Chat</title>
+<style>
+  body { font-family: Arial; margin:0; padding:0; background:#f5f5f5; }
+  #chat-container { max-width:600px; margin:0 auto; padding:10px; }
+  #chatbox { height:60vh; overflow-y:auto; background:#fff; border-radius:10px; padding:10px; margin-bottom:10px; }
+  .msg { margin:8px 0; }
+  .user { color:blue; }
+  .bot { color:green; }
+  #inputArea { display:flex; }
+  #userInput { flex:1; padding:10px; border-radius:8px; border:1px solid #ccc; }
+  button { padding:10px; margin-left:5px; border:none; border-radius:8px; background:#4a90e2; color:white; font-weight:bold; }
+</style>
+</head>
+<body>
+
+<div id="chat-container">
+  <h2>🤖 Free AI Chat</h2>
+  <div id="chatbox"></div>
+  <div id="inputArea">
+    <input type="text" id="userInput" placeholder="Type a message...">
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<script>
+const chatbox = document.getElementById("chatbox");
+
+async function sendMessage() {
+  const input = document.getElementById("userInput").value.trim();
+  if (!input) return;
+  chatbox.innerHTML += `<div class="msg user"><b>You:</b> ${input}</div>`;
+  document.getElementById("userInput").value = "";
+
+  try {
+    const res = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: input }),
+    });
+    const data = await res.json();
+    chatbox.innerHTML += `<div class="msg bot"><b>Bot:</b> ${data.reply}</div>`;
+    chatbox.scrollTop = chatbox.scrollHeight;
+  } catch (err) {
+    chatbox.innerHTML += `<div class="msg bot">Error connecting to AI server.</div>`;
+  }
+}
+</script>
+
+</body>
+</html>
