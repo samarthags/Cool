@@ -2,8 +2,9 @@ from flask import Flask, request, jsonify
 from text_generation import Client  # pip install text-generation
 
 app = Flask(__name__)
-# You can use Phi-3-mini for faster response (~300-400MB)
-client = Client("tiiuae/falcon-7b-instruct")
+
+# Use a small model suitable for free Render instance (~300MB)
+client = Client("tiiuae/phi-3-mini")  
 
 @app.route("/api/v1/generate", methods=["POST"])
 def generate():
